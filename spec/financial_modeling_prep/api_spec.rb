@@ -4,7 +4,7 @@ require "financial_modeling_prep"
 
 RSpec.describe FinancialModelingPrep::API do
 
-  let(:api) { described_class.new('03341a8e04942af8cca7ded0670758b0') }
+  let(:api) { described_class.new }
 
   describe '#search' do
     subject { api.search(query: "Apple") }

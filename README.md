@@ -35,6 +35,12 @@ First instantiate a FinanceModelingPrep API client:
 fmp = FinancialModelingPrep::API.new(ENV['YOUR_FINANCIAL_MODELING_PREP_TOKEN'])
 ```
 
+You can also set the API FINANCIAL_MODELING_PREP_API_KEY and then just call
+
+```ruby
+fmp = FinancialModelingPrep::API.new
+```
+
 Now we can do all sorts...
 
 (Company Search)[https://site.financialmodelingprep.com/developer/docs#company-search]

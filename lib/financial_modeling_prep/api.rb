@@ -11,8 +11,8 @@ module FinancialModelingPrep
     RETRY_WAIT = 10
     MAX_RETRY = 5    
 
-    def initialize(apikey)
-      @apikey = apikey
+    def initialize(apikey = ENV['FINANCIAL_MODELING_PREP_API_KEY'] )
+      @apikey = apikey # fall back on ENV var if non passed in
     end
 
 
@@ -54,11 +54,11 @@ module FinancialModelingPrep
 
           puts response.body
 
-          if response.status == 403
+          if response.status == 403 || response.status == 401
             raise AccessDenied.new response.body
 
           elsif response.status != 200
-            raise ServiceUnavailable.new "#{response.status} #{response.body}"
+            raise ServiceUnavailable.new "#{response.status} #{response.body['Error Message']}"
 
           elsif !response.headers['content-type'].include? JSON_CONTENT_TYPE
             raise InvalidResponse.new response.body
