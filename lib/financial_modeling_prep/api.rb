@@ -37,6 +37,9 @@ module FinancialModelingPrep
       request "earning_call_transcript/#{ticker}", {year: year, quarter: quarter}
     end    
         
+    def sec_filings(ticker:, type: nil, page: nil)
+      request "sec_filings/#{ticker}", {type: type, page: page}
+    end        
 
     private
 

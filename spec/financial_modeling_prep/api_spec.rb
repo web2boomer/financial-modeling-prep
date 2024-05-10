@@ -46,6 +46,12 @@ RSpec.describe FinancialModelingPrep::API do
     end
   end  
 
+  describe '#sec_filings' do
+    subject { api.sec_filings(ticker: 'AAPL') }
 
+    it "includes attributes" do  
+      expect(subject.count).to be > 0
+    end
+  end  
 
 end
