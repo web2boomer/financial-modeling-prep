@@ -20,6 +20,17 @@ module FinancialModelingPrep
       request :search, {query: query}
     end
 
+    def search_ticker(query:)
+      request :search_ticker, {query: query}
+    end
+
+    def search_name(query:)
+      request :search_name, {query: query}
+    end    
+
+    def earnings_calendar(from:, to:)
+      request :earnings_calendar, {from: from, to: to}
+    end
         
 
     private
@@ -29,17 +40,24 @@ module FinancialModelingPrep
 
         args[:apikey] = @apikey # add in API key
 
+        endpoint = endpoint.to_s.gsub('_', '-')
+
         begin
           response = Faraday.get "#{HOST}/#{endpoint}", args
           
-          puts "Args => #{args}"
-          puts "Status => #{response.status}"
-          puts "Headers => #{response.headers}"
-          puts "Body => #{response.body}"
+          # puts "Args => #{args}"
+          # puts "Status => #{response.status}"
+          # puts "Headers => #{response.headers}"
+          # puts "Body => #{response.body}"
           # params = {book: {title: "foo", author: "bar"}} 
           # headers = {Content-Type: 'application/json'}          
 
-          if response.status != 200
+          puts response.body
+
+          if response.status == 403
+            raise AccessDenied.new response.body
+
+          elsif response.status != 200
             raise ServiceUnavailable.new "#{response.status} #{response.body}"
 
           elsif !response.headers['content-type'].include? JSON_CONTENT_TYPE
@@ -58,7 +76,7 @@ module FinancialModelingPrep
         rescue ServiceUnavailable => exception
 
           if retries < MAX_RETRY
-            logger.debug('Service unavailable, retrying...')
+            logger.debug("Service unavailable due to #{exception.message}, retrying...")
             retries += 1
             sleep RETRY_WAIT
             retry

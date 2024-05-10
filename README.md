@@ -42,7 +42,7 @@ Now we can do all sorts...
 ```ruby
 companies = fmp.search(query: 'Apple')
 companies = fmp.search_ticker(query: 'AA')
-companies = fmp.search_name(query: 'AA')
+companies = fmp.search_name(query: 'Microsoft')
 ```
 
 (Company Information)[https://site.financialmodelingprep.com/developer/docs#company-information]
@@ -51,6 +51,10 @@ companies = fmp.search_name(query: 'AA')
 company_profile = fmp.profile(query: 'Apple')
 executive_compensations = fmp.executive_compensation(query: 'AAPL')
 stock_grade = fmp.grade(query: 'AAPL')
+```
+
+```ruby
+earnings_announcements = fmp.earnings_calendar(from: '2024-05-01', to: '2024-05-10')
 ```
 
 
