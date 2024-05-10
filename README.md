@@ -62,4 +62,4 @@ To install this gem onto your local machine, run `bundle exec rake install`. To 
 
 ## Contributing
 
-Bug reports and pull requests are welcome on GitHub at ________________________. 
+Bug reports and pull requests are welcome on GitHub at [https://github.com/web2boomer/financial-modeling-prep.git](https://github.com/web2boomer/financial-modeling-prep.git). 
