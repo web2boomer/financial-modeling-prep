@@ -59,6 +59,8 @@ executive_compensations = fmp.executive_compensation(query: 'AAPL')
 stock_grade = fmp.grade(query: 'AAPL')
 ```
 
+(Earnings Calendar)[https://site.financialmodelingprep.com/developer/docs/earnings-calendar-api]
+
 ```ruby
 earnings_announcements = fmp.earnings_calendar(from: '2024-05-01', to: '2024-05-10')
 ```

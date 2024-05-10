@@ -38,6 +38,14 @@ RSpec.describe FinancialModelingPrep::API do
     end
   end  
 
+  describe '#earning_call_transcript' do
+    subject { api.earning_call_transcript(ticker: 'AAPL', year: '2024', quarter: '1') }
+
+    it "includes attributes" do  
+      expect(subject.count).to be > 0
+    end
+  end  
+
 
 
 end

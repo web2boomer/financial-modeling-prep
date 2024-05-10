@@ -15,22 +15,27 @@ module FinancialModelingPrep
       @apikey = apikey # fall back on ENV var if non passed in
     end
 
+    # beginning of endpoints, note that there are inconsistencies with some endpoints using hyphens and some underscores. To make this more obvious, hypens are strings.
 
     def search(query:)
       request :search, {query: query}
     end
 
     def search_ticker(query:)
-      request :search_ticker, {query: query}
+      request "search-ticker", {query: query}
     end
 
     def search_name(query:)
-      request :search_name, {query: query}
+      request "search-name", {query: query}
     end    
 
     def earnings_calendar(from:, to:)
-      request :earnings_calendar, {from: from, to: to}
+      request :earning_calendar, {from: from, to: to}
     end
+
+    def earning_call_transcript(ticker:, year:, quarter:)
+      request "earning_call_transcript/#{ticker}", {year: year, quarter: quarter}
+    end    
         
 
     private
@@ -40,10 +45,11 @@ module FinancialModelingPrep
 
         args[:apikey] = @apikey # add in API key
 
-        endpoint = endpoint.to_s.gsub('_', '-')
+        # endpoint = endpoint.to_s.gsub('_', '-')
 
         begin
-          response = Faraday.get "#{HOST}/#{endpoint}", args
+          full_endpoint_url = "#{HOST}/#{endpoint}"
+          response = Faraday.get full_endpoint_url, args
           
           # puts "Args => #{args}"
           # puts "Status => #{response.status}"
