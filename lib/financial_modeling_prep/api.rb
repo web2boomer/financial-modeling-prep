@@ -54,14 +54,8 @@ module FinancialModelingPrep
           full_endpoint_url = "#{HOST}/#{endpoint}"
           response = Faraday.get full_endpoint_url, args
           
-          # puts "Args => #{args}"
-          # puts "Status => #{response.status}"
-          # puts "Headers => #{response.headers}"
-          # puts "Body => #{response.body}"
-          # params = {book: {title: "foo", author: "bar"}} 
-          # headers = {Content-Type: 'application/json'}          
-
-          puts response.body
+          logger.debug response.status
+          logger.debug response.body
 
           if response.status == 403 || response.status == 401
             raise AccessDenied.new response.body

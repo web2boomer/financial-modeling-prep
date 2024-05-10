@@ -35,8 +35,8 @@ PLATFORMS
 
 DEPENDENCIES
   financial-modeling-prep!
-  rake (~> 13.0)
-  rspec (~> 3.0)
+  rake
+  rspec
 
 BUNDLED WITH
    2.4.12
