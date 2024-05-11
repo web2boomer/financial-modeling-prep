@@ -33,20 +33,20 @@ module FinancialModelingPrep
       request "search-name", {query: query}
     end    
     
-    def profile(ticker:)
-      request "profile/#{ticker}"
+    def profile(symbol:)
+      request "profile/#{symbol}"
     end      
 
     def earnings_calendar(from:, to:)
       request :earning_calendar, {from: from, to: to}
     end
 
-    def earning_call_transcript(ticker:, year:, quarter:)
-      request "earning_call_transcript/#{ticker}", {year: year, quarter: quarter}
+    def earning_call_transcript(symbol:, year:, quarter:)
+      request "earning_call_transcript/#{symbol}", {year: year, quarter: quarter}
     end    
         
-    def sec_filings(ticker:, type: nil, page: nil)
-      request "sec_filings/#{ticker}", {type: type, page: page}
+    def sec_filings(symbol:, type: nil, page: nil)
+      request "sec_filings/#{symbol}", {type: type, page: page}
     end        
 
     private

@@ -54,7 +54,7 @@ companies = fmp.search_name(query: 'Microsoft')
 (Company Information)[https://site.financialmodelingprep.com/developer/docs#company-information]
 
 ```ruby
-company_profile = fmp.profile(ticker: 'Apple')
+company_profile = fmp.profile(symbol: 'AAPL')
 executive_compensations = fmp.executive_compensation(query: 'AAPL')
 stock_grade = fmp.grade(query: 'AAPL')
 ```
@@ -63,14 +63,14 @@ stock_grade = fmp.grade(query: 'AAPL')
 
 ```ruby
 earnings_announcements = fmp.earnings_calendar(from: '2024-05-01', to: '2024-05-10')
-earnings_transcript = fmp.earning_call_transcript(ticker: 'AAPL', year: '2024', quarter: '1')
+earnings_transcript = fmp.earning_call_transcript(symbol: 'AAPL', year: '2024', quarter: '1')
 
 ```
 
 (SEC Filings)[https://site.financialmodelingprep.com/developer/docs#securities-and-exchange-commission-(s.e.c)]
 
 ```ruby
-earnings_transcript = fmp.sec_filings(ticker: 'AAPL', type: , page: )
+earnings_transcript = fmp.sec_filings(symbol: 'AAPL', type: , page: )
 
 ```
 

@@ -31,7 +31,7 @@ RSpec.describe FinancialModelingPrep::API do
   end
 
   describe '#profile' do
-    subject { api.profile(ticker: "AAPL") }
+    subject { api.profile(symbol: "AAPL") }
 
     it "includes attributes" do  
       expect(subject.count).to be > 0
@@ -47,7 +47,7 @@ RSpec.describe FinancialModelingPrep::API do
   end  
 
   describe '#earning_call_transcript' do
-    subject { api.earning_call_transcript(ticker: 'AAPL', year: '2024', quarter: '1') }
+    subject { api.earning_call_transcript(symbol: 'AAPL', year: '2024', quarter: '1') }
 
     it "includes attributes" do  
       expect(subject.count).to be > 0
@@ -55,7 +55,7 @@ RSpec.describe FinancialModelingPrep::API do
   end  
 
   describe '#sec_filings' do
-    subject { api.sec_filings(ticker: 'AAPL') }
+    subject { api.sec_filings(symbol: 'AAPL') }
 
     it "includes attributes" do  
       expect(subject.count).to be > 0
