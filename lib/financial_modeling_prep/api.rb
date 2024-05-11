@@ -29,6 +29,14 @@ module FinancialModelingPrep
       request "search-name", {query: query}
     end    
 
+    def search_name(query:)
+      request "search-name", {query: query}
+    end    
+    
+    def profile(ticker:)
+      request "profile/#{ticker}"
+    end      
+
     def earnings_calendar(from:, to:)
       request :earning_calendar, {from: from, to: to}
     end
@@ -43,19 +51,17 @@ module FinancialModelingPrep
 
     private
 
-      def request(endpoint, args)
+      def request(endpoint, args = Hash.new)
         retries = 0
 
         args[:apikey] = @apikey # add in API key
-
-        # endpoint = endpoint.to_s.gsub('_', '-')
 
         begin
           full_endpoint_url = "#{HOST}/#{endpoint}"
           response = Faraday.get full_endpoint_url, args
           
-          logger.debug response.status
-          logger.debug response.body
+          # logger.debug response.status
+          # logger.debug response.body
 
           if response.status == 403 || response.status == 401
             raise AccessDenied.new response.body

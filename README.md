@@ -54,7 +54,7 @@ companies = fmp.search_name(query: 'Microsoft')
 (Company Information)[https://site.financialmodelingprep.com/developer/docs#company-information]
 
 ```ruby
-company_profile = fmp.profile(query: 'Apple')
+company_profile = fmp.profile(ticker: 'Apple')
 executive_compensations = fmp.executive_compensation(query: 'AAPL')
 stock_grade = fmp.grade(query: 'AAPL')
 ```
