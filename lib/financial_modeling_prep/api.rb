@@ -67,7 +67,8 @@ module FinancialModelingPrep
             raise AccessDenied.new response.body
 
           elsif response.status != 200
-            raise ServiceUnavailable.new "#{response.status} #{response.body}"
+            error_message = JSON.parse response.body
+            raise ServiceUnavailable.new "#{response.status} #{error_message["Error Message"]}"
 
           elsif !response.headers['content-type'].include? JSON_CONTENT_TYPE
             raise InvalidResponse.new response.body
@@ -86,7 +87,7 @@ module FinancialModelingPrep
 
           if retries < MAX_RETRY
             retries += 1
-            logger.debug("Service unavailable due to #{exception.message}, retrying (attempt #{retries} of #{MAX_RETRY})...")
+            logger.info("Service unavailable due to #{exception.message}, retrying (attempt #{retries} of #{MAX_RETRY})...")
             sleep RETRY_WAIT
             retry
           else
