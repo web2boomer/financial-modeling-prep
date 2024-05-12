@@ -9,7 +9,7 @@ module FinancialModelingPrep
     JSON_CONTENT_TYPE = 'application/json'
 
     RETRY_WAIT = 10
-    MAX_RETRY = 5    
+    MAX_RETRY = 6    
 
     def initialize(apikey = ENV['FINANCIAL_MODELING_PREP_API_KEY'] )
       @apikey = apikey # fall back on ENV var if non passed in
@@ -67,7 +67,7 @@ module FinancialModelingPrep
             raise AccessDenied.new response.body
 
           elsif response.status != 200
-            raise ServiceUnavailable.new "#{response.status} #{response.body['Error Message']}"
+            raise ServiceUnavailable.new "#{response.status} #{response.body}"
 
           elsif !response.headers['content-type'].include? JSON_CONTENT_TYPE
             raise InvalidResponse.new response.body
@@ -85,8 +85,8 @@ module FinancialModelingPrep
         rescue ServiceUnavailable => exception
 
           if retries < MAX_RETRY
-            logger.debug("Service unavailable due to #{exception.message}, retrying...")
             retries += 1
+            logger.debug("Service unavailable due to #{exception.message}, retrying (attempt #{retries} of #{MAX_RETRY})...")
             sleep RETRY_WAIT
             retry
           else
