@@ -18,7 +18,7 @@ module FinancialModelingPrep
     # beginning of endpoints, note that there are inconsistencies with some endpoints using hyphens and some underscores. To make this more obvious, hypens are strings.
 
     def search(query:)
-      request :search, {query: query}
+      request "v3/search", {query: query}
     end
 
     def search_ticker(query:)
@@ -38,7 +38,7 @@ module FinancialModelingPrep
     end      
 
     def earnings_calendar(from:, to:)
-      request :earning_calendar, {from: from, to: to}
+      request "v3/earning_calendar", {from: from, to: to}
     end
 
     def earning_call_transcript(symbol:, year: nil, quarter: nil)
