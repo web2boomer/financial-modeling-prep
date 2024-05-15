@@ -4,7 +4,7 @@ require 'faraday'
 
 module FinancialModelingPrep
   class API
-    HOST = "https://financialmodelingprep.com/api/v3"
+    HOST = "https://financialmodelingprep.com/api/"
     
     JSON_CONTENT_TYPE = 'application/json'
 
@@ -22,34 +22,38 @@ module FinancialModelingPrep
     end
 
     def search_ticker(query:)
-      request "search-ticker", {query: query}
+      request "v3/search-ticker", {query: query}
     end
 
     def search_name(query:)
-      request "search-name", {query: query}
+      request "v3/search-name", {query: query}
     end    
 
     def search_name(query:)
-      request "search-name", {query: query}
+      request "v3/search-name", {query: query}
     end    
     
     def profile(symbol:)
-      request "profile/#{symbol}"
+      request "v3/profile/#{symbol}"
     end      
 
     def earnings_calendar(from:, to:)
       request :earning_calendar, {from: from, to: to}
     end
 
-    def earning_call_transcript(symbol:, year:, quarter:)
-      request "earning_call_transcript/#{symbol}", {year: year, quarter: quarter}
-    end    
+    def earning_call_transcript(symbol:, year: nil, quarter: nil)
+      request "v3/earning_call_transcript/#{symbol}", {year: year, quarter: quarter} 
+    end   
+    
+    def earning_call_dates(symbol:, year: nil, quarter: nil)
+      request "v4/earning_call_transcript", {symbol: symbol} # note v4 of API
+    end       
         
     def sec_filings(symbol: nil, type: nil, page: nil)
       if symbol
-        request "sec_filings/#{symbol}", {type: type, page: page} 
+        request "v3/sec_filings/#{symbol}", {type: type, page: page} 
       else
-        request "rss_feed", {page: 0} 
+        request "v3/rss_feed", {page: 0} 
       end
     end        
 
@@ -61,7 +65,8 @@ module FinancialModelingPrep
         args[:apikey] = @apikey # add in API key
 
         begin
-          full_endpoint_url = "#{HOST}/#{endpoint}"
+          full_endpoint_url = "#{HOST}#{endpoint}"
+          puts full_endpoint_url
           response = Faraday.get full_endpoint_url, args
           
           # logger.debug response.status
