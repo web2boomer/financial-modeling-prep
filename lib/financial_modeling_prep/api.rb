@@ -66,7 +66,6 @@ module FinancialModelingPrep
 
         begin
           full_endpoint_url = "#{HOST}#{endpoint}"
-          puts full_endpoint_url
           response = Faraday.get full_endpoint_url, args
           
           # logger.debug response.status
