@@ -70,7 +70,8 @@ earnings_transcript = fmp.earning_call_transcript(symbol: 'AAPL', year: '2024', 
 (SEC Filings)[https://site.financialmodelingprep.com/developer/docs#securities-and-exchange-commission-(s.e.c)]
 
 ```ruby
-earnings_transcript = fmp.sec_filings(symbol: 'AAPL', type: , page: )
+earnings_transcript = fmp.sec_filings(symbol: 'AAPL', type: '10-q', page: )
+earnings_transcript = fmp.sec_filings(page: ) # all recent filings
 
 ```
 

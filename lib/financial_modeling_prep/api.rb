@@ -45,8 +45,12 @@ module FinancialModelingPrep
       request "earning_call_transcript/#{symbol}", {year: year, quarter: quarter}
     end    
         
-    def sec_filings(symbol:, type: nil, page: nil)
-      request "sec_filings/#{symbol}", {type: type, page: page}
+    def sec_filings(symbol: nil, type: nil, page: nil)
+      if symbol
+        request "sec_filings/#{symbol}", {type: type, page: page} 
+      else
+        request "rss_feed", {page: 0} 
+      end
     end        
 
     private
