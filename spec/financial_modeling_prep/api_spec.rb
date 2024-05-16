@@ -46,6 +46,14 @@ RSpec.describe FinancialModelingPrep::API do
     end
   end  
 
+  describe '#earning_calendar_confirmed' do
+    subject { api.earning_calendar_confirmed(from: '2024-02-01', to: '2024-05-10') }
+
+    it "includes attributes" do  
+      expect(subject.count).to be > 0
+    end
+  end   
+
   describe '#earning_call_transcript' do
     subject { api.earning_call_transcript(symbol: 'AAPL', year: '2024', quarter: '1') }
 

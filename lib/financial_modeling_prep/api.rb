@@ -41,6 +41,10 @@ module FinancialModelingPrep
       request "v3/earning_calendar", {from: from, to: to}
     end
 
+    def earning_calendar_confirmed(from:, to:)
+      request "v4/earning-calendar-confirmed", {from: from, to: to} # note v4 of API
+    end        
+
     def earning_call_transcript(symbol:, year: nil, quarter: nil)
       request "v3/earning_call_transcript/#{symbol}", {year: year, quarter: quarter} 
     end   
@@ -48,6 +52,8 @@ module FinancialModelingPrep
     def earning_call_dates(symbol:, year: nil, quarter: nil)
       request "v4/earning_call_transcript", {symbol: symbol} # note v4 of API
     end       
+
+   
         
     def sec_filings(symbol: nil, type: nil, page: nil)
       if symbol
@@ -56,6 +62,7 @@ module FinancialModelingPrep
         request "v3/rss_feed", {page: 0} 
       end
     end        
+
 
     private
 
@@ -68,9 +75,9 @@ module FinancialModelingPrep
           full_endpoint_url = "#{HOST}#{endpoint}"
           response = Faraday.get full_endpoint_url, args
           
-          # logger.debug full_endpoint_url
-          # logger.debug response.status
-          # logger.debug response.body
+          logger.debug full_endpoint_url
+          logger.debug response.status
+          logger.debug response.body
 
           if response.status == 403 || response.status == 401
             raise AccessDenied.new response.body
