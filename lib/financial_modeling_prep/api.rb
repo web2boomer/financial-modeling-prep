@@ -75,9 +75,9 @@ module FinancialModelingPrep
           full_endpoint_url = "#{HOST}#{endpoint}"
           response = Faraday.get full_endpoint_url, args
           
-          logger.debug full_endpoint_url
-          logger.debug response.status
-          logger.debug response.body
+          # logger.debug full_endpoint_url
+          # logger.debug response.status
+          # logger.debug response.body
 
           if response.status == 403 || response.status == 401
             raise AccessDenied.new response.body
