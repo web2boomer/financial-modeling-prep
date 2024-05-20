@@ -62,6 +62,14 @@ RSpec.describe FinancialModelingPrep::API do
     end
   end  
 
+  describe '#press_releases' do
+    subject { api.press_releases(symbol: 'AAPL') }
+
+    it "includes attributes" do  
+      expect(subject.count).to be > 0
+    end
+  end    
+
   describe '#sec_filings' do
     subject { api.sec_filings(symbol: 'AAPL') }
 
