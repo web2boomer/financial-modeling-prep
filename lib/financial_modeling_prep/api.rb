@@ -37,6 +37,10 @@ module FinancialModelingPrep
       request "v3/profile/#{symbol}"
     end      
 
+    def company_core_info(symbol:)
+      request "v4/company-core-information", {symbol: symbol} # note v4 of API
+    end         
+
     def earnings_calendar(from:, to:)
       request "v3/earning_calendar", {from: from, to: to}
     end

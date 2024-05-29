@@ -38,6 +38,16 @@ RSpec.describe FinancialModelingPrep::API do
     end
   end
 
+
+  describe '#company_core_info' do
+    subject { api.company_core_info(symbol: "AAPL") }
+
+    it "includes attributes" do  
+      expect(subject.count).to be > 0
+    end
+  end
+  
+
   describe '#earnings_calendar' do
     subject { api.earnings_calendar(from: '2024-05-01', to: '2024-05-10') }
 
