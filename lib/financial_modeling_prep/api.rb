@@ -53,7 +53,7 @@ module FinancialModelingPrep
       request "v3/earning_call_transcript/#{symbol}", {year: year, quarter: quarter} 
     end   
     
-    def earning_call_dates(symbol:, year: nil, quarter: nil)
+    def earning_call_dates(symbol: )
       request "v4/earning_call_transcript", {symbol: symbol} # note v4 of API
     end       
 
