@@ -57,6 +57,10 @@ module FinancialModelingPrep
       request "v4/earning_call_transcript", {symbol: symbol} # note v4 of API
     end       
 
+    def batch_earning_call_transcript(symbol:, year: nil)
+      request "v4/batch_earning_call_transcript/#{symbol}", {year: year} # note v4 of API
+    end         
+
     def press_releases(symbol:)
       request "v3/press-releases/#{symbol}"
     end       
