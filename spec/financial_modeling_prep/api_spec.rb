@@ -72,6 +72,18 @@ RSpec.describe FinancialModelingPrep::API do
     end
   end  
 
+  describe '#earning_call_dates' do
+    subject { api.earning_call_dates(symbol: 'AAPL') }
+
+    it "includes attributes" do  
+      expect(subject.count).to be > 0
+    end
+  end  
+
+
+
+  
+
   describe '#batch_earning_call_transcript' do
     subject { api.batch_earning_call_transcript(symbol: 'AAPL', year: '2024') }
 
