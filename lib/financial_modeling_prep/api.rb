@@ -93,6 +93,9 @@ module FinancialModelingPrep
           if response.status == 403 || response.status == 401
             raise AccessDenied.new response.body
 
+          elsif response.status == 504
+            raise ServiceUnavailable.new "#{response.status} Gateway Timeout"
+
           elsif response.status != 200
             error_message = JSON.parse response.body
             raise ServiceUnavailable.new "#{response.status} #{error_message["Error Message"]}"
