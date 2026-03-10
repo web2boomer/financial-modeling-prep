@@ -65,6 +65,30 @@ module FinancialModelingPrep
       request "v3/press-releases/#{symbol}"
     end       
         
+    def analyst_estimates(symbol:, period: nil, page: nil, limit: nil)
+      request "v3/analyst-estimates/#{symbol}", {period: period, page: page, limit: limit}.compact
+    end
+
+    def price_target_consensus(symbol:)
+      request "v4/price-target-consensus", {symbol: symbol}
+    end
+
+    def grades(symbol:, limit: nil)
+      request "v3/grade/#{symbol}", {limit: limit}.compact
+    end
+
+    def insider_trading(symbol:, page: nil, limit: nil)
+      request "v4/insider-trading", {symbol: symbol, page: page, limit: limit}.compact
+    end
+
+    def shares_float(symbol:)
+      request "v4/shares_float", {symbol: symbol}
+    end
+
+    def ratios_ttm(symbol:)
+      request "v3/ratios-ttm/#{symbol}"
+    end
+
     def sec_filings(symbol: nil, type: nil, page: nil)
       if symbol
         request "v3/sec_filings/#{symbol}", {type: type, page: page} 
