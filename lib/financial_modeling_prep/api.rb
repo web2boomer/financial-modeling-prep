@@ -61,10 +61,14 @@ module FinancialModelingPrep
       request "v4/batch_earning_call_transcript/#{symbol}", {year: year} # note v4 of API
     end         
 
-    def press_releases(symbol:)
-      request "v3/press-releases/#{symbol}"
-    end       
-        
+    def press_releases(symbol:, page: 0)
+      request "v3/press-releases/#{symbol}", {page: page}
+    end
+
+    def stock_news(tickers:, page: 0, limit: 50)
+      request "v3/stock_news", {tickers: tickers, page: page, limit: limit}
+    end
+
     def analyst_estimates(symbol:, period: nil, page: nil, limit: nil)
       request "v3/analyst-estimates/#{symbol}", {period: period, page: page, limit: limit}.compact
     end
