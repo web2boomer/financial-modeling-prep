@@ -1,17 +1,22 @@
 require 'json'
 require 'logger'
+require 'time'
 require 'faraday'
 
 module FinancialModelingPrep
   class API
     HOST = "https://financialmodelingprep.com/api/"
-    
+
     JSON_CONTENT_TYPE = 'application/json'
 
     RETRY_WAIT = 10
-    MAX_RETRY = 6    
+    MAX_RETRY = 6
+    MAX_BACKOFF_429 = 120
+    MAX_BACKOFF_5XX = 60
+    OPEN_TIMEOUT = 10
+    READ_TIMEOUT = 60
 
-    def initialize(apikey = ENV['FINANCIAL_MODELING_PREP_API_KEY'] )
+    def initialize(apikey = ENV['FINANCIAL_MODELING_PREP_API_KEY'])
       @apikey = apikey # fall back on ENV var if non passed in
     end
 
@@ -27,19 +32,15 @@ module FinancialModelingPrep
 
     def search_name(query:)
       request "v3/search-name", {query: query}
-    end    
+    end
 
-    def search_name(query:)
-      request "v3/search-name", {query: query}
-    end    
-    
     def profile(symbol:)
       request "v3/profile/#{symbol}"
-    end      
+    end
 
     def company_core_info(symbol:)
       request "v4/company-core-information", {symbol: symbol} # note v4 of API
-    end         
+    end
 
     def earnings_calendar(from:, to:)
       request "v3/earning_calendar", {from: from, to: to}
@@ -47,19 +48,19 @@ module FinancialModelingPrep
 
     def earning_calendar_confirmed(from:, to:)
       request "v4/earning-calendar-confirmed", {from: from, to: to} # note v4 of API
-    end        
+    end
 
     def earning_call_transcript(symbol:, year: nil, quarter: nil)
-      request "v3/earning_call_transcript/#{symbol}", {year: year, quarter: quarter} 
-    end   
-    
-    def earning_call_dates(symbol: )
+      request "v3/earning_call_transcript/#{symbol}", {year: year, quarter: quarter}
+    end
+
+    def earning_call_dates(symbol:)
       request "v4/earning_call_transcript", {symbol: symbol} # note v4 of API
-    end       
+    end
 
     def batch_earning_call_transcript(symbol:, year: nil)
       request "v4/batch_earning_call_transcript/#{symbol}", {year: year} # note v4 of API
-    end         
+    end
 
     def press_releases(symbol:, page: 0)
       request "v3/press-releases/#{symbol}", {page: page}
@@ -95,70 +96,136 @@ module FinancialModelingPrep
 
     def sec_filings(symbol: nil, type: nil, page: nil)
       if symbol
-        request "v3/sec_filings/#{symbol}", {type: type, page: page} 
+        request "v3/sec_filings/#{symbol}", {type: type, page: page}
       else
-        request "v3/rss_feed", {page: 0} 
+        request "v3/rss_feed", {page: page || 0}
       end
-    end        
-
+    end
 
     private
 
-      def request(endpoint, args = Hash.new)
+      def request(endpoint, args = {})
         retries = 0
-
-        args[:apikey] = @apikey # add in API key
+        req_args = args.merge(apikey: @apikey)
+        full_endpoint_url = nil
 
         begin
           full_endpoint_url = "#{HOST}#{endpoint}"
-          response = Faraday.get full_endpoint_url, args
-          
-          # logger.debug full_endpoint_url
-          # logger.debug args
-          # logger.debug response.status
-          # logger.debug response.body
+          response = connection.get(full_endpoint_url, req_args)
 
-          if response.status == 403 || response.status == 401
-            raise AccessDenied.new response.body
+          case response.status
+          when 401, 403
+            raise AccessDenied, response.body
 
-          elsif response.status == 504
-            raise ServiceUnavailable.new "#{response.status} Gateway Timeout"
+          when 200
+            content_type = response.headers["content-type"] || response.headers["Content-Type"]
+            unless content_type&.include?(JSON_CONTENT_TYPE)
+              raise InvalidResponse, response.body
+            end
+            return JSON.parse(response.body)
 
-          elsif response.status != 200
-            error_message = JSON.parse response.body
-            raise ServiceUnavailable.new "#{response.status} #{error_message["Error Message"]}"
+          when 429, 500..599
+            detail = parse_error_detail(response.body)
+            msg = detail.empty? ? "#{response.status}" : "#{response.status} #{detail}"
+            ra = parse_retry_after(response)
+            raise ServiceUnavailable.new(msg, http_status: response.status, retry_after: ra)
 
-          elsif !response.headers['content-type'].include? JSON_CONTENT_TYPE
-            raise InvalidResponse.new response.body
-
-          elsif response.success?
-            return JSON.parse response.body
+          when 400..499
+            raise Error, error_message_from_body(response.body, response.status)
 
           else
-            raise Error.new response.body
+            raise Error, error_message_from_body(response.body, response.status)
           end
-
-
-
-
         rescue ServiceUnavailable => exception
-
           if retries < MAX_RETRY
             retries += 1
-            logger.info("Service unavailable due to #{exception.message}, retrying (attempt #{retries} of #{MAX_RETRY})...")
-            sleep RETRY_WAIT
+            wait = backoff_sleep(exception.http_status, exception.retry_after, retries)
+            logger.info("Service unavailable for #{request_log_line(full_endpoint_url, req_args)} due to #{exception.message}, retrying (attempt #{retries} of #{MAX_RETRY}, sleeping #{wait.round(1)}s)...")
+            sleep wait
             retry
           else
+            logger.warn("Service unavailable for #{request_log_line(full_endpoint_url, req_args)} giving up after #{MAX_RETRY} attempts: #{exception.message}")
+            raise exception
+          end
+        rescue Faraday::TimeoutError, Faraday::ConnectionFailed => exception
+          if retries < MAX_RETRY
+            retries += 1
+            wait = backoff_sleep(nil, nil, retries)
+            logger.info("FMP connection error for #{request_log_line(full_endpoint_url, req_args)} (#{exception.class}: #{exception.message}), retrying (attempt #{retries} of #{MAX_RETRY}, sleeping #{wait.round(1)}s)...")
+            sleep wait
+            retry
+          else
+            logger.warn("FMP connection error for #{request_log_line(full_endpoint_url, req_args)} giving up after #{MAX_RETRY} attempts: #{exception.class}: #{exception.message}")
             raise exception
           end
         end
       end
 
+      def connection
+        @connection ||= Faraday.new do |f|
+          f.options.open_timeout = OPEN_TIMEOUT
+          f.options.timeout = READ_TIMEOUT
+        end
+      end
+
+      def error_message_from_body(body, status)
+        detail = parse_error_detail(body)
+        detail.empty? ? "HTTP #{status}" : "#{status} #{detail}"
+      end
+
+      def parse_error_detail(body)
+        return "" if body.nil?
+        b = body.to_s
+        return b.byteslice(0, 240) if b.strip.empty?
+        json = JSON.parse(b)
+        msg = json["Error Message"] || json["error"] || json["message"]
+        s = msg&.to_s
+        s = b.byteslice(0, 240) if s.nil? || s.empty?
+        s.byteslice(0, 240)
+      rescue JSON::ParserError
+        b.byteslice(0, 240)
+      end
+
+      def parse_retry_after(response)
+        raw = response.headers["retry-after"] || response.headers["Retry-After"]
+        return nil if raw.nil? || raw.to_s.strip.empty?
+        s = raw.to_s.strip
+        if /\A\d+\z/.match?(s)
+          s.to_i.clamp(1, 3600)
+        else
+          t = Time.httpdate(s)
+          sec = (t - Time.now).to_i
+          sec.clamp(1, 3600) if sec.positive?
+        end
+      rescue ArgumentError, TypeError
+        nil
+      end
+
+      def backoff_sleep(http_status, retry_after, retries)
+        jitter = rand * 2.0
+        if retry_after
+          return [retry_after.to_f, 3600].min + jitter
+        end
+        case http_status
+        when 429
+          exp = RETRY_WAIT * (2**(retries - 1))
+          [exp, MAX_BACKOFF_429].min + jitter
+        when 500..599
+          exp = RETRY_WAIT * (2**(retries - 1))
+          [exp, MAX_BACKOFF_5XX].min + jitter
+        else
+          RETRY_WAIT + jitter
+        end
+      end
+
+      # URL + params for logs; apikey is never included.
+      def request_log_line(full_endpoint_url, args)
+        visible = args.reject { |k, _| k == :apikey || k == "apikey" }
+        "#{full_endpoint_url} #{visible.inspect}"
+      end
 
       def logger
         @logger ||= Logger.new(STDOUT)
       end
-
   end
 end
-
