@@ -137,6 +137,9 @@ module FinancialModelingPrep
             raise Error, error_message_from_body(response.body, response.status)
           end
         rescue ServiceUnavailable => exception
+          # 429: do not retry or sleep — callers can back off or skip (rate limits are per-account).
+          raise exception if exception.http_status == 429
+
           if retries < MAX_RETRY
             retries += 1
             wait = backoff_sleep(exception.http_status, exception.retry_after, retries)
